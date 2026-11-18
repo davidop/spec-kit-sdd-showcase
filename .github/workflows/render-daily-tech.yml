@@ -3,13 +3,20 @@ on:
   workflow_dispatch:
     inputs:
       editorial_file:
-        description: 'Committed, verified JSON: content/daily/YYYY-MM-DD.json'
+        description: 'Committed verified JSON: content/daily/YYYY-MM-DD.json'
         required: true
         type: string
+  push:
+    branches: [main]
+    paths:
+      - 'content/daily/*.json'
+concurrency:
+  group: daily-tech-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 55
     permissions:
       contents: read
     steps:
@@ -23,33 +30,61 @@ jobs:
           sudo apt-get install -y ffmpeg
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Prepare and validate editorial input
+      - name: Resolve editorial input
+        id: editorial
         env:
-          EDITORIAL_FILE: ${{ inputs.editorial_file }}
+          REQUESTED_FILE: ${{ inputs.editorial_file }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          case "$EDITORIAL_FILE" in content/daily/*.json) ;; *) echo 'Invalid editorial file path'; exit 1;; esac
-          node scripts/prepare-daily-props.mjs "$EDITORIAL_FILE" out/daily-props.json
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            FILE="$REQUESTED_FILE"
+          else
+            FILE=$(find content/daily -maxdepth 1 -type f -name '????-??-??.json' | sort | tail -n 1)
+          fi
+          case "$FILE" in content/daily/*.json) ;; *) echo 'Invalid editorial file path'; exit 1;; esac
+          test -f "$FILE"
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+          node scripts/prepare-daily-props.mjs "$FILE" out/daily-props.json
+      - name: Prepare SRT and optional Azure Speech narration
+        env:
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
+          AZURE_SPEECH_VOICE: ${{ vars.AZURE_SPEECH_VOICE }}
+        run: python3 scripts/produce-daily-audio.py out/daily-props.json
       - name: Render vertical video
-        run: npx remotion render src/index.ts DailyTech out/resumen-tech-diario.mp4 --props out/daily-props.json --codec h264 --pixel-format yuv420p
-      - name: Inspect and validate MP4
+        run: npx remotion render src/index.ts DailyTech out/daily-silent.mp4 --props out/daily-props.json --codec h264 --pixel-format yuv420p
+      - name: Mux narration when present
+        run: |
+          if [ -s out/narration.m4a ]; then
+            ffmpeg -y -i out/daily-silent.mp4 -i out/narration.m4a -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -t 90 -movflags +faststart out/resumen-tech-diario.mp4
+            echo 'Narrated video produced' >> "$GITHUB_STEP_SUMMARY"
+          else
+            cp out/daily-silent.mp4 out/resumen-tech-diario.mp4
+            echo 'SILENT PREVIEW ONLY: Azure Speech secrets not configured' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Validate MP4
         run: |
           test -s out/resumen-tech-diario.mp4
-          ffprobe -v error -show_entries format=duration -show_entries stream=width,height,r_frame_rate,codec_name,pix_fmt -of json out/resumen-tech-diario.mp4
           python3 - <<'PY'
-          import json,subprocess
+          import json,subprocess,os
           p='out/resumen-tech-diario.mp4'
           d=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',p]))
           v=next(s for s in d['streams'] if s['codec_type']=='video')
           assert (v['width'],v['height'],v['codec_name'],v['pix_fmt'],v['r_frame_rate'])==(1080,1920,'h264','yuv420p','30/1'),v
           assert abs(float(d['format']['duration'])-90)<.2
-          print('PASS technical validation. Silent preview; narration and music NOT implemented.')
+          has_audio=any(s['codec_type']=='audio' for s in d['streams'])
+          assert has_audio==os.path.exists('out/narration.m4a')
+          assert os.path.getsize('out/resumen-tech-diario.srt')>0
+          print('PASS:', 'narrated' if has_audio else 'silent preview', '90s 1080x1920 H264 30fps')
           PY
-      - name: Upload video and editorial metadata
+      - name: Upload review package
         uses: actions/upload-artifact@v4
         with:
-          name: resumen-tech-diario-preview
+          name: resumen-tech-diario-review
           path: |
             out/resumen-tech-diario.mp4
+            out/resumen-tech-diario.srt
+            out/narration-script.txt
             out/daily-props.json
           if-no-files-found: error
           retention-days: 14
