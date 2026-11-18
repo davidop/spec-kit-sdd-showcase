@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-18",
+  "language": "es-ES",
+  "headline": "Work IQ en Copilot Studio: contexto empresarial con controles",
+  "summary": "Microsoft documenta disponibilidad general de Work IQ en nuevos agentes con Microsoft Copilot harness. El agente puede usar contexto de archivos, correos, reuniones y chats; los administradores deben delimitar cargas de trabajo y permisos.",
+  "sources": [
+    {
+      "title": "Microsoft Learn: novedades Copilot Studio, octubre 2026",
+      "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/whats-new",
+      "published_at": "2026-10-01"
+    },
+    {
+      "title": "Microsoft Learn: Work IQ in Copilot Studio",
+      "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-work-iq",
+      "published_at": "2026-10-01"
+    }
+  ],
+  "claims": [
+    {
+      "text": "Work IQ se añade por defecto a los nuevos agentes basados en Microsoft Copilot harness.",
+      "source_urls": [
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/whats-new",
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-work-iq"
+      ],
+      "classification": "verified"
+    },
+    {
+      "text": "Las cargas de trabajo pueden limitarse según el caso de uso; algunas, como Business apps, siguen en preview.",
+      "source_urls": [
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-work-iq"
+      ],
+      "classification": "verified"
+    },
+    {
+      "text": "Las operaciones de escritura están activadas por defecto, pero sujetas a permisos y políticas de la organización.",
+      "source_urls": [
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-work-iq"
+      ],
+      "classification": "verified"
+    }
+  ],
+  "video": {
+    "format": "vertical-9:16",
+    "duration_seconds": 90,
+    "voice_locale": "es-ES",
+    "publish_requires_approval": true
+  }
+}
