@@ -1,31 +1,49 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 
-const scenes = [
-  {start:0,end:180,eyebrow:'01 · EL RETO',title:'Una funcionalidad.\nTres repositorios.',detail:'Cotizador de seguros de hogar · API .NET · React · Terraform'},
-  {start:180,end:540,eyebrow:'02 · SPEC-DRIVEN DEVELOPMENT',title:'Primero la especificación.',detail:'Necesidad → requisitos → plan → tareas → implementación'},
-  {start:540,end:1080,eyebrow:'03 · SPEC KIT 1.4.1',title:'Novedades en contexto.',detail:'Verificar cada novedad con las notas oficiales antes de narrarla'},
-  {start:1080,end:1560,eyebrow:'04 · ARQUITECTURA',title:'API · Web · Infra',detail:'Tres repositorios coordinados mediante contratos y revisión humana'},
-  {start:1560,end:2070,eyebrow:'05 · ASISTENTES ALTERNATIVOS',title:'Copilot · Claude · Codex',detail:'Tres opciones de asistente, no una orquestación automática'},
-  {start:2070,end:2460,eyebrow:'06 · QUALITY GATES',title:'PR → CI/CD → revisión',detail:'Tests, análisis y aprobaciones simulados para explicar el proceso'},
-  {start:2460,end:2700,eyebrow:'07 · CONCLUSIÓN',title:'Especificar antes de generar.',detail:'Microsoft MVP · David Oliva'},
-];
-
-export const Showcase:React.FC=()=>{
- const frame=useCurrentFrame();
- const s=scenes.find(x=>frame>=x.start && frame<x.end)??scenes[scenes.length-1];
- const local=frame-s.start;
- const opacity=interpolate(local,[0,18,Math.max(19,s.end-s.start-20),s.end-s.start],[0,1,1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
- const isLight=frame<1080;
- const fg=isLight?'#17213c':'#f4f7ff';
- return <AbsoluteFill style={{background:isLight?'#f5f8fd':'#0b1429',color:fg,fontFamily:'Arial, sans-serif',padding:90,justifyContent:'center'}}>
-   <div style={{position:'absolute',top:115,left:90,fontSize:29,fontWeight:700,letterSpacing:3,color:'#5689d8'}}>SPEC KIT / SDD SHOWCASE</div>
-   <div style={{opacity,transform:`translateY(${(1-opacity)*30}px)`}}>
-    <div style={{fontSize:29,color:'#5b91e8',fontWeight:700,letterSpacing:3,marginBottom:38}}>{s.eyebrow}</div>
-    <div style={{fontSize:91,fontWeight:800,letterSpacing:-3,lineHeight:1.08,whiteSpace:'pre-line'}}>{s.title}</div>
-    <div style={{fontSize:38,lineHeight:1.4,marginTop:50,opacity:.8}}>{s.detail}</div>
-   </div>
-   <div style={{position:'absolute',bottom:115,left:90,right:90,height:8,background:isLight?'#dbe3ef':'#273653',borderRadius:8}}><div style={{width:`${100*frame/2700}%`,height:'100%',background:'#548af4',borderRadius:8}}/></div>
-   <div style={{position:'absolute',bottom:65,left:90,fontSize:23,opacity:.6}}>RECREACIÓN TÉCNICA · ANIMATIC DE PRODUCCIÓN</div>
- </AbsoluteFill>;
+const C={navy:'#071427',ink:'#13233e',blue:'#4b8eff',cyan:'#46d9e8',purple:'#aa89ff',green:'#44d6a1',gold:'#f7c66c',white:'#f6f9ff',muted:'#98aec9'};
+const blocks=[
+ {start:0,end:180,kicker:'EL DESAFÍO',headline:'Una cobertura nueva.\nTres repositorios.',sub:'Un cambio funcional debe conservar la coherencia técnica.',kind:'intro',light:true},
+ {start:180,end:540,kicker:'SPEC-DRIVEN DEVELOPMENT',headline:'Primero, el contrato.',sub:'De una necesidad de negocio a criterios verificables.',kind:'spec',light:true},
+ {start:540,end:1080,kicker:'SPEC KIT 1.4.1',headline:'Extensiones y mejoras.\nSin magia.',sub:'Catálogo comunitario ≠ orquestación nativa.',kind:'release',light:true},
+ {start:1080,end:1560,kicker:'ARQUITECTURA MULTI-REPO',headline:'Un cambio, tres capas.',sub:'React · ASP.NET Core · Azure / Terraform',kind:'architecture',light:false},
+ {start:1560,end:2070,kicker:'IMPLEMENTACIÓN ASISTIDA',headline:'Código bajo control.',sub:'Copilot, Claude Code o Codex: alternativas de asistencia.',kind:'code',light:false},
+ {start:2070,end:2460,kicker:'QUALITY GATES',headline:'Generar no es validar.',sub:'Diff → Pull Request → CI/CD → revisión humana',kind:'checks',light:false},
+ {start:2460,end:2700,kicker:'CONCLUSIÓN',headline:'La especificación\ncoordina el cambio.',sub:'Microsoft MVP · David Oliva',kind:'end',light:false}
+] as const;
+type Block=typeof blocks[number];
+const ease=(frame:number,start:number,end:number)=>interpolate(frame,[start,end],[0,1],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
+const Panel:React.FC<{children:React.ReactNode,x:number,y:number,w:number,h:number,dark?:boolean,opacity?:number}>=({children,x,y,w,h,dark=false,opacity=1})=><div style={{position:'absolute',left:x,top:y,width:w,height:h,opacity,boxSizing:'border-box',padding:28,borderRadius:27,background:dark?'#14243c':'#ffffff',border:`1px solid ${dark?'#344964':'#dce6f3'}`,boxShadow:'0 22px 58px #0714271c',overflow:'hidden'}}>{children}</div>;
+const Dot:React.FC<{color?:string}>=({color=C.blue})=><span style={{display:'inline-block',width:13,height:13,borderRadius:20,background:color,marginRight:12}}/>;
+const Chip:React.FC<{text:string,color?:string}>=({text,color=C.blue})=><span style={{display:'inline-block',padding:'9px 17px',borderRadius:100,background:color+'23',color,fontWeight:700,fontSize:23,marginRight:9}}>{text}</span>;
+const Code:React.FC<{lines:string[],accent?:string}>=({lines,accent=C.cyan})=><div style={{fontFamily:'monospace',fontSize:25,lineHeight:1.62,color:'#cbdaf1'}}>{lines.map((line,i)=><div key={i} style={{whiteSpace:'pre',color:line.startsWith('+')?C.green:line.startsWith('-')?'#ff9090':line.startsWith('>')?accent:'#cbdaf1'}}>{String(i+1).padStart(2,'0')}  {line}</div>)}</div>;
+const Repo:React.FC<{name:string,desc:string,color:string,x:number,y:number,active?:boolean}>=({name,desc,color,x,y,active})=><div style={{position:'absolute',left:x,top:y,width:310,height:185,borderRadius:25,padding:25,boxSizing:'border-box',background:active?'#19355b':'#14243c',border:`2px solid ${active?color:'#33465f'}`,boxShadow:active?`0 0 60px ${color}30`:'none'}}><div style={{fontSize:25,color,fontWeight:800,marginBottom:20}}>▣ {name}</div><div style={{fontSize:24,color:'#d5e3f6'}}>{desc}</div></div>;
+const Scene:React.FC<{block:Block,frame:number}>=({block,frame})=>{
+ const local=frame-block.start, duration=block.end-block.start;
+ const fade=Math.min(ease(local,0,18),1-ease(local,duration-20,duration));
+ const travel=interpolate(local,[0,duration],[0,1],{extrapolateRight:'clamp'});
+ const light=block.light;
+ const fg=light?C.ink:C.white;
+ const headingSize=block.kind==='end'?88:77;
+ return <AbsoluteFill style={{background:light?'#f2f7fe':C.navy,color:fg,fontFamily:'Arial, sans-serif',overflow:'hidden'}}>
+  <div style={{position:'absolute',width:1000,height:1000,left:400,top:-430,borderRadius:1000,background:light?'#dce9ff':'#152e57',filter:'blur(120px)',opacity:.7}}/>
+  <div style={{position:'absolute',left:72,right:72,top:82,display:'flex',justifyContent:'space-between',fontSize:24,fontWeight:800,letterSpacing:2,color:light?'#4574bd':C.cyan}}><span>SPEC KIT / SDD</span><span>01.04.01 · SHOWCASE</span></div>
+  <div style={{position:'absolute',left:72,top:205,right:72,opacity:fade,transform:`translateY(${(1-fade)*28}px)`}}>
+    <div style={{fontSize:25,fontWeight:800,color:light?'#4b77c2':C.cyan,letterSpacing:3,marginBottom:22}}>{block.kicker}</div>
+    <div style={{fontSize:headingSize,lineHeight:1.09,fontWeight:800,letterSpacing:-2.7,whiteSpace:'pre-line'}}>{block.headline}</div>
+    <div style={{fontSize:30,marginTop:26,color:light?'#566983':'#a8bdd7',lineHeight:1.35}}>{block.sub}</div>
+  </div>
+  <div style={{position:'absolute',left:0,right:0,top:730,bottom:170,opacity:fade}}>
+   {block.kind==='intro'&&<><Panel x={80} y={90} w={920} h={555}><div style={{fontSize:31,fontWeight:800,marginBottom:38}}>Cotizador de hogar <Chip text="DEMO" color={C.blue}/></div><div style={{fontSize:29,marginBottom:25}}>Cobertura opcional de daños por agua</div><div style={{height:80,border:'2px solid #c7d7ee',borderRadius:17,padding:'21px 24px',boxSizing:'border-box',fontSize:29}}>☑ Incluir cobertura de daños por agua</div><div style={{display:'flex',justifyContent:'space-between',marginTop:40,fontSize:30}}><span>Prima base</span><b>240,00 €</b></div><div style={{display:'flex',justifyContent:'space-between',marginTop:20,fontSize:30}}><span>Suplemento</span><b>+28,00 €</b></div><div style={{height:2,background:'#d7e2f1',marginTop:30}}/><div style={{display:'flex',justifyContent:'space-between',marginTop:27,fontSize:40,color:'#235db3'}}><b>Total</b><b>268,00 €</b></div></Panel><div style={{position:'absolute',top:690,left:100,fontSize:25,color:'#647d9d'}}>Importes ficticios · interfaz recreada</div></>}
+   {block.kind==='spec'&&<><Panel x={80} y={55} w={920} h={660}><div style={{fontSize:30,fontWeight:800,marginBottom:30}}>specs/water-damage/</div>{['01  specify.md    ·  Cobertura opcional','02  plan.md       ·  API + React + Azure','03  tasks.md      ·  Cambios por repositorio','04  tests.md      ·  Criterios de aceptación'].map((s,i)=><div key={i} style={{fontSize:27,padding:'25px 10px',borderBottom:'1px solid #dbe6f2',fontFamily:'monospace',opacity:ease(local,35+i*28,65+i*28)}}>{s}</div>)}<div style={{marginTop:36}}><Chip text="Requisitos" color={C.blue}/><Chip text="Contratos" color={C.purple}/><Chip text="Tests" color="#20856b"/></div></Panel></>}
+   {block.kind==='release'&&<><Panel x={80} y={35} w={920} h={700}><div style={{fontSize:28,fontWeight:800,marginBottom:32}}>Novedades en el contexto del cotizador</div>{[{t:'Catálogo de extensiones',d:'Opciones comunitarias para flujos multi-repo',c:C.blue},{t:'Integraciones comunitarias',d:'Jira y OKR: extensiones, no requisitos',c:C.purple},{t:'Mejoras de PowerShell',d:'Correcciones de manejo de rutas',c:'#278c73'}].map((a,i)=><div key={i} style={{padding:'30px 18px',borderRadius:18,background:i%2===0?'#f0f5fc':'white',marginBottom:12,opacity:ease(local,35+i*50,70+i*50),transform:`translateX(${(1-ease(local,35+i*50,70+i*50))*35}px)`}}><div style={{fontSize:30,fontWeight:800,color:a.c}}>{a.t}</div><div style={{fontSize:25,color:'#526783',marginTop:12}}>{a.d}</div></div>)}<div style={{fontSize:24,color:'#61758e',marginTop:20}}>Verificar notas oficiales antes de la locución final.</div></Panel></>}
+   {block.kind==='architecture'&&<><svg style={{position:'absolute',top:0,left:0}} width="1080" height="760" viewBox="0 0 1080 760"><path d="M 220 270 L 540 470 L 860 270" stroke={C.blue} strokeWidth="6" fill="none" strokeDasharray="14 14" strokeDashoffset={-travel*200}/><path d="M 540 470 L 540 625" stroke={C.cyan} strokeWidth="5" strokeDasharray="12 14" strokeDashoffset={-travel*100}/><circle cx={540} cy={470} r={14} fill={C.cyan}/></svg><Repo x={65} y={145} name="home-quote-web" desc="React · UI y desglose" color={C.cyan} active={travel<.35}/><Repo x={705} y={145} name="home-quote-api" desc=".NET · prima y reglas" color={C.blue} active={travel>=.35&&travel<.7}/><Repo x={385} y={535} name="home-quote-infra" desc="Terraform · observabilidad" color={C.purple} active={travel>=.7}/><div style={{position:'absolute',left:190,top:800,fontSize:24,color:C.muted}}>Infraestructura solo si existe una necesidad justificada.</div></>}
+   {block.kind==='code'&&<><Panel dark x={62} y={30} w={956} h={655}><div style={{fontSize:27,fontWeight:800,marginBottom:30,color:C.white}}>Pull request · cobertura de agua <Chip text="SIMULACIÓN" color={C.gold}/></div><div style={{display:'flex',gap:15,marginBottom:25}}><Chip text="React"/><Chip text="ASP.NET Core" color={C.cyan}/><Chip text="Terraform" color={C.purple}/></div><Code lines={['diff --git a/QuoteForm.tsx b/QuoteForm.tsx','+ <WaterDamageOption checked={enabled} />','+ <PremiumBreakdown quote={quote} />','diff --git a/QuoteService.cs b/QuoteService.cs','+ var supplement = coverage ? 28m : 0m;','+ return new Quote(basePremium, supplement);','// Contratos y cifras: ilustrativos']} /></Panel><div style={{position:'absolute',top:715,left:85,fontSize:26,color:C.muted}}>Copilot · Claude Code · Codex = asistentes alternativos</div></>}
+   {block.kind==='checks'&&<><Panel dark x={75} y={45} w={930} h={660}><div style={{fontSize:29,fontWeight:800,color:C.white,marginBottom:33}}>Pull request #42 · checks <Chip text="SIMULADOS" color={C.gold}/></div>{[{name:'Build · API + Web',status:'PASS'},{name:'Tests unitarios y de contrato',status:'PASS'},{name:'Análisis de seguridad',status:'PASS'},{name:'Revisión humana',status:'REQUIRED'}].map((v,i)=>{const visible=ease(local,30+i*40,60+i*40);return <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:'1px solid #314661',padding:'29px 5px',fontSize:27,opacity:visible}}><span><Dot color={i===3?C.gold:C.green}/>{v.name}</span><b style={{color:i===3?C.gold:C.green,fontSize:23}}>{v.status}</b></div>})}<div style={{fontSize:24,color:C.muted,marginTop:34}}>No se han ejecutado estos checks en esta demostración.</div></Panel></>}
+   {block.kind==='end'&&<><div style={{position:'absolute',top:80,left:100,width:880,height:520,borderRadius:48,background:'linear-gradient(135deg,#143e71,#1b2351)',border:'1px solid #436eac',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',boxShadow:'0 0 130px #4b8eff24'}}><div style={{fontSize:35,color:C.cyan,fontWeight:800,marginBottom:30}}>SPEC → PLAN → IMPLEMENT → VERIFY</div><div style={{fontSize:69,fontWeight:800,textAlign:'center',lineHeight:1.15}}>Menos ambigüedad.\nMás control.</div><div style={{fontSize:30,marginTop:40,color:'#b9d4f5'}}>Microsoft MVP · David Oliva</div></div></>}
+  </div>
+  <div style={{position:'absolute',left:72,right:72,bottom:102,height:7,borderRadius:10,background:light?'#d5e3f4':'#2b3d57'}}><div style={{height:'100%',width:`${100*frame/2700}%`,borderRadius:10,background:light?C.blue:C.cyan}}/></div>
+  <div style={{position:'absolute',left:72,bottom:50,fontSize:20,color:light?'#647995':C.muted}}>DEMO VISUAL · CONTENIDO SIMULADO</div><div style={{position:'absolute',right:72,bottom:50,fontSize:21,color:light?'#647995':C.muted}}>{String(Math.floor(frame/30)).padStart(2,'0')} / 90 s</div>
+ </AbsoluteFill>
 };
+export const Showcase:React.FC=()=>{const frame=useCurrentFrame();const block=blocks.find(b=>frame>=b.start&&frame<b.end)??blocks[blocks.length-1];return <Scene frame={frame} block={block}/>};
