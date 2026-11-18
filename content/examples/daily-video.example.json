@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-18",
+  "language": "es-ES",
+  "headline": "Ejemplo de entrada editorial: no publicar",
+  "summary": "Archivo de demostración del contrato de entrada, sin noticias ni afirmaciones verificadas.",
+  "sources": [
+    {
+      "title": "Fuente de ejemplo, sustituir",
+      "url": "https://example.org/source",
+      "published_at": "2026-11-18"
+    }
+  ],
+  "claims": [
+    {
+      "text": "Afirmación ficticia para probar el contrato de datos.",
+      "source_urls": [
+        "https://example.org/source"
+      ],
+      "classification": "simulation"
+    }
+  ],
+  "video": {
+    "format": "vertical-9:16",
+    "duration_seconds": 90,
+    "voice_locale": "es-ES",
+    "publish_requires_approval": true
+  }
+}
