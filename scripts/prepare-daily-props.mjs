@@ -4,6 +4,7 @@ const input=process.argv[2],out=process.argv[3]??'out/daily-props.json';
 if(!input)throw Error('Provide input JSON');
 execFileSync(process.execPath,['scripts/validate-editorial.mjs',input],{stdio:'inherit'});
 const data=JSON.parse(fs.readFileSync(input,'utf8'));
+if(data.video.duration_seconds!==90)throw Error('Current DailyTech composition supports exactly 90 seconds');
 if(data.headline.includes('no publicar')||data.sources.some(s=>new URL(s.url).hostname==='example.org'))throw Error('Example or placeholder content cannot be rendered as news');
 fs.mkdirSync('out',{recursive:true});
 fs.writeFileSync(out,JSON.stringify({date:data.date,headline:data.headline,summary:data.summary,sources:data.sources,claims:data.claims,video:data.video}));
