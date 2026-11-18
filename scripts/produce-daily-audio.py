@@ -23,7 +23,7 @@ region=os.environ.get('AZURE_SPEECH_REGION','')
 if not (key and region):
     print('No Azure Speech credentials: SRT and script generated, narration unavailable.')
     sys.exit(0)
-voice=os.environ.get('AZURE_SPEECH_VOICE','es-ES-AlvaroNeural')
+voice=(os.environ.get('AZURE_SPEECH_VOICE') or 'es-ES-AlvaroNeural')
 clips=[]
 for i,(title,body) in enumerate(sections):
     text=html.escape(title+'. '+body)
