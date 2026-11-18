@@ -21,6 +21,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -30,20 +32,15 @@ jobs:
           sudo apt-get install -y ffmpeg
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Resolve editorial input
+      - name: Resolve changed editorial input
         id: editorial
         env:
           REQUESTED_FILE: ${{ inputs.editorial_file }}
-          EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
         run: |
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            FILE="$REQUESTED_FILE"
-          else
-            FILE=$(find content/daily -maxdepth 1 -type f -name '????-??-??.json' | sort | tail -n 1)
-          fi
-          case "$FILE" in content/daily/*.json) ;; *) echo 'Invalid editorial file path'; exit 1;; esac
-          test -f "$FILE"
-          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+          node scripts/select-daily-input.mjs
+          FILE=$(grep '^file=' "$GITHUB_OUTPUT" | tail -n 1 | cut -d= -f2-)
+          test -n "$FILE" || { echo 'No new editorial JSON to render'; exit 1; }
           node scripts/prepare-daily-props.mjs "$FILE" out/daily-props.json
       - name: Prepare SRT and optional Azure Speech narration
         env:
