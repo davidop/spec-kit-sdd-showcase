@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
+const input=process.argv[2],out=process.argv[3]??'out/daily-props.json';
+if(!input)throw Error('Provide input JSON');
+execFileSync(process.execPath,['scripts/validate-editorial.mjs',input],{stdio:'inherit'});
+const data=JSON.parse(fs.readFileSync(input,'utf8'));
+if(data.headline.includes('no publicar')||data.sources.some(s=>new URL(s.url).hostname==='example.org'))throw Error('Example or placeholder content cannot be rendered as news');
+fs.mkdirSync('out',{recursive:true});
+fs.writeFileSync(out,JSON.stringify({date:data.date,headline:data.headline,summary:data.summary,sources:data.sources,claims:data.claims,video:data.video}));
+console.log('Prepared',out);
