@@ -11,6 +11,8 @@ on:
     paths:
       - 'content/daily/*.json'
       - 'scripts/validate-editorial.mjs'
+      - 'scripts/test-daily-pipeline.mjs'
+      - 'scripts/prepare-daily-props.mjs'
       - '.github/workflows/daily-video-input.yml'
 jobs:
   validate:
@@ -22,6 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Test editorial pipeline safety
+        run: node scripts/test-daily-pipeline.mjs
       - name: Validate editorial inputs
         env:
           INPUT_FILE: ${{ inputs.editorial_file }}
