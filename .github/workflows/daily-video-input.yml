@@ -1,0 +1,36 @@
+name: Daily Tech editorial validation
+on:
+  workflow_dispatch:
+    inputs:
+      editorial_file:
+        description: 'Path to committed editorial JSON (content/daily/YYYY-MM-DD.json)'
+        required: true
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - 'content/daily/*.json'
+      - 'scripts/validate-editorial.mjs'
+      - '.github/workflows/daily-video-input.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate editorial inputs
+        env:
+          INPUT_FILE: ${{ inputs.editorial_file }}
+        run: |
+          if [ -n "$INPUT_FILE" ]; then
+            case "$INPUT_FILE" in content/daily/*.json) ;; *) echo 'Invalid input path'; exit 1;; esac
+            node scripts/validate-editorial.mjs "$INPUT_FILE"
+          else
+            find content/daily -maxdepth 1 -name '*.json' -print -exec node scripts/validate-editorial.mjs {} \;
+          fi
+      - name: Summary
+        run: echo 'Editorial structure validated. Automated video rendering is not yet enabled until the source bridge, TTS and review gate are implemented.' >> "$GITHUB_STEP_SUMMARY"
