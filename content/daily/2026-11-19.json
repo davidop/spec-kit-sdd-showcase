@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-19",
+  "language": "es-ES",
+  "headline": "Model Assessment (preview): pruebas de regresión al cambiar modelos en Copilot Studio",
+  "summary": "Microsoft documenta Model Assessment en Copilot Agent Kit (preview): baseline del agente, evaluación tras cambiar de modelo y comparación de hasta tres ejecuciones del mismo motor. Para una migración segura, las pruebas deben acompañarse de controles de aceptación, revisión de herramientas, latencia, costes y aprobación humana. Análisis editorial: incorporar estos controles como puerta de calidad ALM, sin confundir una evaluación con garantía de seguridad.",
+  "sources": [
+    {
+      "title": "Microsoft Learn — Assess model changes with Copilot Agent Kit (preview); actualización 17 noviembre 2026",
+      "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/kit-model-assessment",
+      "published_at": "2026-11-17"
+    },
+    {
+      "title": "Microsoft Learn — Run and validate an AI model migration for Copilot Studio agents; fecha de actualización no verificada",
+      "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/manage-agent-model-migration",
+      "published_at": "2026-11-17"
+    }
+  ],
+  "claims": [
+    {
+      "text": "Model Assessment en Copilot Agent Kit está en preview y compara el comportamiento de un agente antes y después de cambiar su modelo usando una baseline y pruebas repetibles.",
+      "source_urls": [
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/kit-model-assessment"
+      ],
+      "classification": "verified"
+    },
+    {
+      "text": "Se pueden comparar hasta tres ejecuciones completadas, pero solo del mismo motor de evaluación; los resultados de motores distintos no son directamente comparables.",
+      "source_urls": [
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/kit-model-assessment"
+      ],
+      "classification": "verified"
+    },
+    {
+      "text": "Los tests de Copilot Agent Kit requieren agente publicado y harness estándar; Copilot Studio evaluations no requieren publicación y también admiten Microsoft Copilot harness.",
+      "source_urls": [
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/kit-model-assessment",
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/manage-agent-model-migration"
+      ],
+      "classification": "verified"
+    },
+    {
+      "text": "Cada ejecución de Model Assessment consume aproximadamente 150 Copilot Credits; latencia y consumo deben medirse por separado para valorar una migración.",
+      "source_urls": [
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/kit-model-assessment",
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/manage-agent-model-migration"
+      ],
+      "classification": "verified"
+    },
+    {
+      "text": "Propuesta de arquitectura ALM: baseline, candidato en entorno no productivo, pruebas de regresión, umbrales de aceptación, aprobación del responsable y despliegue progresivo; es una recomendación, no una ejecución real.",
+      "source_urls": [
+        "https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/manage-agent-model-migration"
+      ],
+      "classification": "analysis"
+    }
+  ],
+  "video": {
+    "format": "vertical-9:16",
+    "duration_seconds": 90,
+    "voice_locale": "es-ES",
+    "publish_requires_approval": true
+  }
+}
