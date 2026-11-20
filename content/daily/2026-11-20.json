@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-20",
+  "language": "es-ES",
+  "headline": "Foundry Agent Service: de las trazas de producción a mejoras verificadas",
+  "summary": "Microsoft anunció en Ignite 2026 un ciclo de mejora de agentes basado en evidencias reales: Insights para detectar fallos recurrentes (GA), anotaciones y datasets (preview), propuestas de Agent Optimizer (preview) y optimización de skills y costes (preview). Análisis: integrar estas capacidades en un flujo de evaluación, aprobación humana y despliegue controlado; no son actualizaciones autónomas en producción.",
+  "sources": [
+    {
+      "title": "Microsoft Foundry Blog — What's new in Foundry Agent Service at Ignite 2026 (18 noviembre 2026)",
+      "url": "https://devblogs.microsoft.com/foundry/whats-new-in-foundry-agent-service-at-ignite-2026/",
+      "published_at": "2026-11-18"
+    }
+  ],
+  "claims": [
+    {
+      "text": "Microsoft Foundry Insights está disponible de forma general para identificar problemas recurrentes y examinar evidencias en trazas de agentes de producción.",
+      "source_urls": [
+        "https://devblogs.microsoft.com/foundry/whats-new-in-foundry-agent-service-at-ignite-2026/"
+      ],
+      "classification": "verified"
+    },
+    {
+      "text": "Las anotaciones de expertos y los datasets de evaluación están en preview; convierten observaciones sobre ejecuciones reales en casos de prueba reutilizables.",
+      "source_urls": [
+        "https://devblogs.microsoft.com/foundry/whats-new-in-foundry-agent-service-at-ignite-2026/"
+      ],
+      "classification": "verified"
+    },
+    {
+      "text": "La conexión de Insights con Agent Optimizer y la optimización de skills y costes siguen en preview; generan o evalúan cambios candidatos, no despliegan modificaciones automáticamente.",
+      "source_urls": [
+        "https://devblogs.microsoft.com/foundry/whats-new-in-foundry-agent-service-at-ignite-2026/"
+      ],
+      "classification": "verified"
+    },
+    {
+      "text": "Arquitectura propuesta: instrumentar agentes, seleccionar fallos reales, versionar datasets, evaluar correcciones, exigir aprobación humana y desplegar mediante CI/CD con posibilidad de rollback. Es una recomendación técnica, no una demostración ejecutada.",
+      "source_urls": [
+        "https://devblogs.microsoft.com/foundry/whats-new-in-foundry-agent-service-at-ignite-2026/"
+      ],
+      "classification": "analysis"
+    }
+  ],
+  "video": {
+    "format": "vertical-9:16",
+    "duration_seconds": 90,
+    "voice_locale": "es-ES",
+    "publish_requires_approval": true
+  }
+}
